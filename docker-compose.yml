@@ -1,0 +1,37 @@
+version: "3"
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    hostname: rabbitmq
+    volumes:
+      - /var/lib/rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    networks:
+      - rabbitmq_go_net
+    env_file:
+      - .env
+  
+  micro-app:
+    build: 
+      context: .
+      dockerfile: ./apps/micro/Dockerfile
+      target: develop
+    command: npm run start:dev
+    env_file:
+      - .env
+    ports: 
+      - '3000:3000'
+    depends_on:
+      - rabbitmq
+    networks:
+      - rabbitmq_go_net
+
+networks:
+  rabbitmq_go_net:
+    driver: bridge
